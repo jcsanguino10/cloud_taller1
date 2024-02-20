@@ -1,0 +1,12 @@
+python-multipart==0.0.7
+setuptools==68.2.2
+wheel==0.41.2
+fastapi[all]
+sqlalchemy
+uvicorn[standard]
+python-jose[cryptography]
+psycopg2
+celery
+spire.doc
+spire.presentation
+spire.xls
