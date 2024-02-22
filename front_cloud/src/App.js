@@ -11,7 +11,7 @@ function App() {
   const [token, setToken] = useState(null)
   const [stateTaskComponent, setStateTask] = useState(false);
   const [taskInfo, setTaskInfo] = useState({
-    name: "none",
+    name: "",
     user: 0,
     id: 0
   })

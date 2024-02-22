@@ -24,7 +24,7 @@ export default function Task({isToCreate, token, taskInfo, setTaskInfo}) {
     function submit_form(e) {
         e.preventDefault();
         const formData = new FormData()
-        formData.append("name", taskInfo.name)
+        // formData.append("name", taskInfo.name)
         formData.append("file", file)
         let requestOptions = {
           method: 'POST',
@@ -56,10 +56,10 @@ export default function Task({isToCreate, token, taskInfo, setTaskInfo}) {
         <div className="text-white text-2xl text-bold mb-6">
             {isToCreate? "Create a new task for you": "Update a task"}
         </div>
-        <div className="my-6">
+        {/* <div className="my-6">
             <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
             <input type="text" value={taskInfo.text} onChange={({target})=>setTaskInfo("name",target.value)} rows="4" className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Introduce a name (Optional)"></input>            
-        </div>
+        </div> */}
         <div className="my-6">
         <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Upload file</label>
                 <input 

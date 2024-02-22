@@ -127,15 +127,15 @@ async def create_user(name: str = Form(...), password:str = Form(...)):
     return db_user
 
 # Task
-
+# ,name: str = Form(...),
 @app.post("/task")
-async def create_task(current_user: Annotated[schema.UserData, Depends(get_current_user)],name: str = Form(...),file: UploadFile = File(None)):
+async def create_task(current_user: Annotated[schema.UserData, Depends(get_current_user)],file: UploadFile = File(None)):
     db_user = current_user
     if not db_user:
         raise HTTPException(status_code=400, detail="User not exists")
-    name_file = name
-    if name == "none":
-        name_file = file.filename
+    # name_file = name
+    # if name == "none":
+    name_file = file.filename
     db_task = crud.create_task(db, schema.CreateTask( user = current_user.id, name = name_file))
     transform_document(db_task.id, file)
     return db_task
