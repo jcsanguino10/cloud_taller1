@@ -1,7 +1,5 @@
 from pydantic import BaseModel
-from fastapi import UploadFile, File
 from typing import Optional
-from datetime import date, datetime
 from entities import State
 
 class Token(BaseModel):
@@ -16,8 +14,13 @@ class UserData(BaseModel):
     name : str
     password : str
 
-class Task(BaseModel):
-    id: int
+class CreateTask(BaseModel):
     state : State = State.START
-    url: str
+    name: str
     user : int
+
+class Task(CreateTask):
+    id: int
+    url: Optional[str]
+    class Config:
+        orm_mode = True

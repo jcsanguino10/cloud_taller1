@@ -1,7 +1,7 @@
 import { useState, useEffect} from "react"
 import { useNavigate } from "react-router-dom";
 
-export default function Dashboard({setToken, token, userInfo, setUserInfo, setTaskStateComponent, setInfoTask}) {
+export default function Dashboard({setToken, token, userInfo, setTaskStateComponent}) {
     const [tasks, setTask] = useState([])
     const navigate = useNavigate()
     useEffect(()=>{
@@ -41,25 +41,19 @@ export default function Dashboard({setToken, token, userInfo, setUserInfo, setTa
                     <thead className="text-xs text-gray-700 uppercase bg-white dark:text-gray-400">
                         <tr>
                             <th scope="col" className="px-6 py-3">
-                                Description
+                                Name
                             </th>
                             <th scope="col" className="px-6 py-3">
-                                Date to start
+                                State
                             </th>
                             <th scope="col" className="px-6 py-3">
-                                Date to finish
-                            </th>
-                            <th scope="col" className="px-6 py-3">
-                                Category
-                            </th>
-                            <th scope="col" className="px-6 py-3">
-                                state
+                                Download
                             </th>
                         </tr>
                     </thead>
                     <tbody>
                         {
-                            tasks.length !=0? tasks.map((task)=><Task_detail_list key={task.id} task={task} setInfoTask={setInfoTask} stateTaskTab={setTaskStateComponent}></Task_detail_list>):<></>
+                            tasks.length !=0? tasks.map((task)=><Task_detail_list key={task.id} task={task}></Task_detail_list>):<></>
                         }
                     </tbody>
                 </table>
@@ -77,29 +71,17 @@ export default function Dashboard({setToken, token, userInfo, setUserInfo, setTa
     )
 }
 
-function Task_detail_list({task, setInfoTask ,stateTaskTab}) {
-    const navigate = useNavigate()
+function Task_detail_list({task}) {
     return(
-        <tr key={task.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer" 
-            onClick={()=>{
-                setInfoTask(task)
-                stateTaskTab(false)
-                navigate("/task")
-            }}>
+        <tr key={task.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer" >
             <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                {task.text}
+                {task.name}
             </th>
             <td className="px-6 py-4">
-                {task.create_date}
-            </td>
-            <td className="px-6 py-4">
-                {task.finish_date}
-            </td>
-            <td className="px-6 py-4">
-                {task.category}
-            </td>
-            <td className="px-6 py-4">
                 {task.state}
+            </td>
+            <td className="px-6 py-4">
+                Button
             </td>
         </tr>
     )

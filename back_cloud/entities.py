@@ -20,4 +20,5 @@ class Task(Base):
     id = Column(Integer, primary_key=True)
     state = Column(Enum(State), default=State.START)
     url = Column(String)
+    name = Column(String)
     user = Column(Integer, ForeignKey('user.id'))

@@ -5,7 +5,6 @@ export default function Login({setUserInfo,setToken}) {
     const navigate = useNavigate();
     const [user, setUser] = useState("");
     const [password, setPassword] = useState("");
-    const [image, setImage] = useState(null);
     const [signOn, setSignOn] = useState(false);
 
     function doSignIn(e) {
@@ -13,21 +12,10 @@ export default function Login({setUserInfo,setToken}) {
       const formData = new FormData()
       formData.append("name", user)
       formData.append("password", password)
-      // let body ={
-      //   name: user, 
-      //   password: password
-      // }
       let requestOptions = {
         method: 'POST',
         body: formData
       };
-      if(image !=null){
-        formData.append("image", image)
-        requestOptions = {
-          method: 'POST',
-          body: formData
-        };
-      }
       fetch(process.env.REACT_APP_BACKURL+ "user", requestOptions)
       .then((response) => response.json())  
       .then(
@@ -138,23 +126,7 @@ export default function Login({setUserInfo,setToken}) {
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   />
                 </div>
-              </div>
-
-              {signOn? 
-                <div>
-                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Upload file</label>
-                <input 
-                  id="image"
-                  name="image"
-                  type="file"
-                  onChange={({ target }) => setImage(target.files[0])}
-                  className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" aria-describedby="file_input_help"/>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-300" id="file_input_help">SVG, PNG, JPG or GIF (MAX. 800x400px).</p>
-
-              </div>
-              : <></>}
-
-  
+              </div>  
               <div>
                 <button
                   type="submit"

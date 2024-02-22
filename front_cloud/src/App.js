@@ -7,24 +7,11 @@ import { BrowserRouter as Router, Route, Navigate, Routes } from 'react-router-d
 
 function App() {
 
-  function toStringDate(today) {
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-    const day = String(today.getDate()).padStart(2, '0');
-  
-    const formattedDate = `${year}-${month}-${day}`;
-    return formattedDate;
-  }
-
   const [userInfo, setUserInfo] = useState("")
   const [token, setToken] = useState(null)
   const [stateTaskComponent, setStateTask] = useState(false);
   const [taskInfo, setTaskInfo] = useState({
-    text: "",
-    create_date: toStringDate(new Date()),
-    finish_date: toStringDate(new Date()),
-    state: "",
-    category: 0,
+    name: "none",
     user: 0,
     id: 0
   })
@@ -52,8 +39,8 @@ function App() {
     <Router>
       <Routes>
         <Route path="/login" element={<Login setUserInfo={changeUserInfo} setToken={changeToken}/>} />
-        <Route path="/dashboard" element={token?<Dashboard setInfoTask={setTaskInfo} setToken={changeToken} token={token} userInfo={userInfo} setUserInfo={changeUserInfo} setTaskStateComponent={changeTaskStateComponent}/>: <Navigate to="/login"></Navigate>} />
-        <Route path="/task" element={token?<Task token={token} userInfo={userInfo} isToCreate={stateTaskComponent} taskInfo={taskInfo} setTaskInfo={change_value_task}/>: <Navigate to="/login"></Navigate>} />
+        <Route path="/dashboard" element={token?<Dashboard setToken={changeToken} token={token} userInfo={userInfo} setTaskStateComponent={changeTaskStateComponent}/>: <Navigate to="/login"></Navigate>} />
+        <Route path="/task" element={token?<Task token={token} isToCreate={stateTaskComponent} taskInfo={taskInfo} setTaskInfo={change_value_task}/>: <Navigate to="/login"></Navigate>} />
         <Route path="*" element={token?<Navigate to="/login"></Navigate>:<Navigate to="/dashboard"></Navigate>}/>
       </Routes>
     </Router>

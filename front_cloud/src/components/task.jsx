@@ -1,56 +1,10 @@
-import { useState, useEffect} from "react"
-import Datepicker from "react-tailwindcss-datepicker"; 
+import { useState} from "react"
 import { useNavigate } from "react-router-dom";
 
-export default function Task({userInfo, isToCreate, token, taskInfo, setTaskInfo}) { 
+export default function Task({isToCreate, token, taskInfo, setTaskInfo}) { 
 
     const navigate = useNavigate()
-    const [value, setValue] = useState({ 
-        startDate: taskInfo.create_date, 
-        endDate: taskInfo.finish_date 
-    }); 
-
-    const [categoryName, setCategoryName] = useState("")
-
-    const [categories, setCategories] = useState([])
-
-    useEffect(()=>{
-        const requestOptionUser = {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' , 'Authorization' : token}
-          };
-          fetch(process.env.REACT_APP_BACKURL + "categories", requestOptionUser)
-          .then((response) => response.json())  
-          .then(data => {
-            setCategories(data)
-          })
-          .catch((error)=>{
-            console.log(error)
-          })
-    },[])
-
-    const handleValueChange = (newValue) => {
-        setValue(newValue); 
-        setTaskInfo("create_date", value.startDate)
-        setTaskInfo("finish_date", value.endDate)
-    } 
-
-    function createCategory() {
-        const requestOptionUser = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' , 'Authorization' : token},
-            body: JSON.stringify({"name": categoryName})
-          };
-          fetch(process.env.REACT_APP_BACKURL + "category", requestOptionUser)
-          .then((response) => response.json())  
-          .then(data => {
-            setCategories(categories =>[...categories, data])
-            setCategoryName("")
-          })
-          .catch((error)=>{
-            console.log(error)
-          })
-    }
+    const [file, setFile] = useState(null)
 
     function delete_task() {
         const requestOptionUser = {
@@ -60,7 +14,6 @@ export default function Task({userInfo, isToCreate, token, taskInfo, setTaskInfo
           fetch(process.env.REACT_APP_BACKURL + "task/" + taskInfo.id, requestOptionUser)
           .then((response) => response.json())  
           .then(data => {
-            setCategories([])
             navigate("/dashboard")
           })
           .catch((error)=>{
@@ -70,28 +23,20 @@ export default function Task({userInfo, isToCreate, token, taskInfo, setTaskInfo
 
     function submit_form(e) {
         e.preventDefault();
-        let body_request = taskInfo
-        body_request.user = userInfo.id
-        let requestOptionUser = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' , 'Authorization' : token},
-            body: JSON.stringify(body_request)
-          }; 
+        const formData = new FormData()
+        formData.append("name", taskInfo.name)
+        formData.append("file", file)
+        let requestOptions = {
+          method: 'POST',
+          body: formData,
+          headers: { 'Authorization' : token},
+        };
         let url = process.env.REACT_APP_BACKURL + "task"
-        if (!isToCreate) {
-            requestOptionUser.method = "PUT"
-            url += "/" + taskInfo.id
-        }
-        else{
-            delete body_request.id
-            requestOptionUser.body = JSON.stringify(body_request)
-        }
-        console.log(taskInfo)
-          fetch(url, requestOptionUser)
+          fetch(url, requestOptions)
           .then((response) => response.json())  
           .then(data => {
             console.log(data)
-            setCategories([])
+            setTaskInfo("name","")
             navigate("/dashboard")
           })
           .catch((error)=>{
@@ -112,54 +57,22 @@ export default function Task({userInfo, isToCreate, token, taskInfo, setTaskInfo
             {isToCreate? "Create a new task for you": "Update a task"}
         </div>
         <div className="my-6">
-            <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
-            <textarea value={taskInfo.text} onChange={({target})=>setTaskInfo("text",target.value)} rows="4" className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Leave a comment..."></textarea>            
+            <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
+            <input type="text" value={taskInfo.text} onChange={({target})=>setTaskInfo("name",target.value)} rows="4" className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Introduce a name (Optional)"></input>            
         </div>
         <div className="my-6">
-                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Date to start - Date to finish</label>
-                    <Datepicker 
-                    value={value} 
-                    onChange={handleValueChange} 
-                    /> 
-                </div>
-
-                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select category</label>
-
-                <select value={taskInfo.category} onChange={({target})=>setTaskInfo("category",target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                <option >Choose a category</option>
-                {
-                categories.map((category, index)=><option key={index} value={category.id} >{category.name}</option>)
-                }
-                </select>
-                <label htmlFor="email" className="block text-sm font-medium leading-6 text-white mt-6">
-                  Create category (The category would be add to the list)
-                </label>
-                <div className="flex w-full">
-                <div className="mt-2 w-full">
-                  <input
-                    type="text"
-                    value={categoryName}
-                    onChange={({ target }) => setCategoryName(target.value)}
-                    className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
-                    placeholder="Category name"
-                  />
-                </div>
-                <button 
-                    type="button" 
-                    onClick={()=>{createCategory()}}
-                    className="w-96 mt-2 ml-8 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Create category</button>
-                </div>
-                <label className="mt-6 block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select state</label>
-                <select value={taskInfo.status} onChange={({target})=>setTaskInfo("state",target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                <option >Choose a state</option>
-                    <option value="start">Start</option>
-                    <option value="progress">Progress</option>
-                    <option value="finish">Finish</option>
-                </select>
-
-            <button type="submit" className="mt-6 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">{isToCreate? "Create a new task": "Update task"}</button>
-            {!isToCreate?<button onClick={()=>delete_task()} type="button" className="ml-4 text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium text-sm rounded-lg px-5 py-2.5 text-center me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Delete</button>:<></>}        </form>
-            </div>
+        <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Upload file</label>
+                <input 
+                  id="file"
+                  name="file"
+                  type="file"
+                  onChange={({ target }) => setFile(target.files[0])}
+                  className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" aria-describedby="file_input_help"/>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-300" id="file_input_help">DOCX.</p>
+        </div>
+          <button type="submit" className="mt-6 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">{isToCreate? "Create a new task": "Update task"}</button>
+          {!isToCreate?<button onClick={()=>delete_task()} type="button" className="ml-4 text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium text-sm rounded-lg px-5 py-2.5 text-center me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Delete</button>:<></>}        </form>
+          </div>
         </div>
     )
 }

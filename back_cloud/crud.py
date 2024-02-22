@@ -45,7 +45,7 @@ def update_task(db: Session, task: schema.Task):
         return False
 
 
-def create_task(db: Session, task: schema.Task):
+def create_task(db: Session, task: schema.CreateTask):
     db_task = entities.Task(**task.dict())
     db.add(db_task)
     db.commit()

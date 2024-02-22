@@ -7,6 +7,7 @@ from database import SessionLocal, engine
 from jose import JWTError, jwt
 from celery_worker import transform_document
 
+
 SECRET_KEY = "e495fd6722159e05be44f58d6ce255046dcd45725f9a858bb2f875905651dc78"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_DATE_MINUTES = 120
@@ -82,10 +83,10 @@ def validate_user(user_id, user_id2):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-@app.post("/example")
-def examp(number : int):
-    task = transform_document.delay(int(number))
-    return task.id
+# @app.post("/example")
+# def examp(number : int):
+#     task = transform_document.delay(int(number))
+#     return task.id
 
 # Roots
 
@@ -128,15 +129,15 @@ async def create_user(name: str = Form(...), password:str = Form(...)):
 # Task
 
 @app.post("/task")
-async def create_task(task: schema.Task, current_user: Annotated[schema.UserData, Depends(get_current_user)]):
-    validate_user(task.user, current_user.id)
+async def create_task(current_user: Annotated[schema.UserData, Depends(get_current_user)],name: str = Form(...),file: UploadFile = File(None)):
     db_user = current_user
-    db_category = crud.get_category(db, task.category)
     if not db_user:
         raise HTTPException(status_code=400, detail="User not exists")
-    elif not db_category:
-        raise HTTPException(status_code=400, detail="Category not exists")
-    db_task = crud.create_task(db, task)
+    name_file = name
+    if name == "none":
+        name_file = file.filename
+    db_task = crud.create_task(db, schema.CreateTask( user = current_user.id, name = name_file))
+    transform_document(db_task.id, file)
     return db_task
 
 @app.put("/task/{task_id}")
