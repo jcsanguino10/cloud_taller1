@@ -10,12 +10,17 @@ services:
       POSTGRES_USER: example
       POSTGRES_PASSWORD: example
       POSTGRES_DB: backcloud
+
   backend:
     build: "./back_cloud"
+    volumes:
+      - .:/app
     ports:
       - "8000:8000"
     links:
       - db
+    depends_on:
+      - redis
 
   frontend:
     build: "./front_cloud"
@@ -23,5 +28,20 @@ services:
       - /home/app_back/images_users:/home/app_front/public/images_users
     ports:
       - "3000:3000"
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+
+  celery_worker:
+    container_name: celery_worker
+    build: "./back_cloud"
+    command: celery -A celery_worker worker --pool=solo --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - backend
 volumes:
   postgres_data:

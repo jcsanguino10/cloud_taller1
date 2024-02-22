@@ -7,6 +7,5 @@ uvicorn[standard]
 python-jose[cryptography]
 psycopg2
 celery
-spire.doc
-spire.presentation
-spire.xls
+redis
+flower
