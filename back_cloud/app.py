@@ -47,7 +47,6 @@ def create_access_token(data: dict):
     encoded_jwt = jwt.encode(to_encode, key=SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     try:
         payload = jwt.decode(token, key=SECRET_KEY)
@@ -164,3 +163,4 @@ async def del_task(task_id: int, current_user: Annotated[schema.UserData, Depend
     if not answer:
         raise HTTPException(status_code=400, detail="Category not exists")
     return "Category deleted!"
+

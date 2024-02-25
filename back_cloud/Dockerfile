@@ -1,4 +1,4 @@
-FROM python:3.12.2
+FROM python:3.11
 
 RUN mkdir -p /home/app_back
 
