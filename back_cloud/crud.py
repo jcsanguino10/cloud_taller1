@@ -43,7 +43,15 @@ def update_task(db: Session, task: schema.Task):
         return True
     except:
         return False
-
+    
+def delete_task(db: Session, task_id: schema.Task):
+    try:
+        task = db.query(entities.Task).get(task_id)
+        db.delete(task)
+        db.commit()
+        return True
+    except:
+        return False
 
 def create_task(db: Session, task: schema.CreateTask):
     db_task = entities.Task(**task.dict())
