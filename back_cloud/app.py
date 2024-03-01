@@ -1,7 +1,10 @@
 from fastapi import FastAPI, HTTPException, Depends, status, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, Response
+from conversion_files import conversionWordODTTToPDF, conversionExcelToPDF, conversionPPTToPDF
+import io
 from typing import Annotated
-import crud, entities, schema
+import crud, entities, schema, conversion_files
 from fastapi.security import OAuth2PasswordBearer,OAuth2PasswordRequestForm
 from database import SessionLocal, engine
 from jose import JWTError, jwt
@@ -20,7 +23,7 @@ entities.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 origins = [
-    "http://localhost:3000",  # Update with your React app's origin
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
@@ -163,4 +166,46 @@ async def del_task(task_id: int, current_user: Annotated[schema.UserData, Depend
     if not answer:
         raise HTTPException(status_code=400, detail="Category not exists")
     return "Category deleted!"
+
+#Conversion
+@app.post("/convert-file")
+async def convert_file(file: UploadFile = File(...)):
+    try:
+        if file and file.filename:
+            if file.filename.endswith(".docx") or file.filename.endswith(".odt"):
+                with open(file.filename, "wb") as buffer:
+                    buffer.write(await file.read())
+
+                converted_content = conversionWordODTTToPDF(file.filename)
+                return Response(content=converted_content, media_type="application/pdf")
+
+            elif file.filename.endswith(".xlsx"):
+                with open(file.filename, "wb") as buffer:
+                    buffer.write(await file.read())
+
+                converted_content = conversionExcelToPDF(file.filename)
+                return Response(content=converted_content, media_type="application/pdf")
+
+            elif file.filename.endswith(".pptx"):
+                with open(file.filename, "wb") as buffer:
+                    buffer.write(await file.read())
+
+                converted_content = conversionPPTToPDF(file.filename)
+                return Response(content=converted_content, media_type="application/pdf")
+
+            else:
+                raise HTTPException(status_code=400, detail="Unsupported file format")
+        else:
+            raise HTTPException(status_code=400, detail="No file provided")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+#Descarga
+@app.get("/download-converted-file/{file_name}")
+async def download_converted_file(file_name: str):
+    try:
+        file_path = f"./files/converted_{file_name}.pdf"
+        return FileResponse(file_path, media_type="application/pdf", filename=file_name)
+    except Exception as e:
+        return {"error": str(e)}
 

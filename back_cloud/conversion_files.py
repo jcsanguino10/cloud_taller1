@@ -1,4 +1,5 @@
 import os.path
+import logging
 
 # Word - ODT
 import aspose.words as aw
@@ -11,27 +12,31 @@ from reportlab.platypus import SimpleDocTemplate, Table
 # PPT
 import aspose.slides as slides
 
-name = None
-nameSaveFile = None
 
-# =============================================================
-# Funciones de conversión de los archivos
-# =============================================================
+logging.basicConfig(level=logging.DEBUG)#Dejo esto por si hay que revisar algo
 
 def conversionWordODTTToPDF(inputfile: str):
     """
-    Parameters: 
-    -----------
-        Función para convertir .docx y .odt a .pdf
+    Función para convertir .docx y .odt a .pdf
 
     Args:
-    -----
-        inputfile (str): Nombre con extensión del archivo 
+        inputfile (str): Ruta del archivo de entrada
     """
-    name =  os.path.splitext(inputfile)[0]
-    nameSaveFile = "./files/converted{}.pdf".format(name)
-    doc = aw.Document('./files/' + inputfile)
-    doc.save(nameSaveFile)
+    try:
+        logging.info(f"Iniciando conversión de {inputfile} a PDF")
+        
+        name = os.path.splitext(os.path.basename(inputfile))[0]
+        nameSaveFile = f"./files/converted_{name}.pdf"
+        
+        logging.info(f"Archivo de entrada: {inputfile}")
+        logging.info(f"Archivo de salida: {nameSaveFile}")
+        
+        doc = aw.Document(inputfile)
+        doc.save(nameSaveFile)
+        
+        logging.info("Conversión completada con éxito")
+    except Exception as e:
+        logging.error(f"Error durante la conversión: {e}")
 
 def conversionExcelToPDF(inputfile: str):
     """
@@ -41,12 +46,12 @@ def conversionExcelToPDF(inputfile: str):
 
     Args:
     -----
-        inputfile (str): Nombre con extensión del archivo 
+        inputfile (str): Ruta del archivo de entrada
     """
-    name =  os.path.splitext(inputfile)[0]
-    nameSaveFile = "./files/converted{}.pdf".format(name)
-    
-    wb = load_workbook(filename='./files/' + inputfile)
+    name = os.path.splitext(os.path.basename(inputfile))[0]
+    nameSaveFile = f"./files/converted_{name}.pdf"
+
+    wb = load_workbook(filename=inputfile)
     ws = wb.active
 
     data = [[cell.value for cell in row] for row in ws.iter_rows()]
@@ -64,15 +69,11 @@ def conversionPPTToPDF(inputfile: str):
 
     Args:
     -----
-        inputfile (str): Nombre con extensión del archivo 
+        inputfile (str): Ruta del archivo de entrada
     """
-    name =  os.path.splitext(inputfile)[0]
-    nameSaveFile = "./files/converted{}.pdf".format(name)
+    name = os.path.splitext(os.path.basename(inputfile))[0]
+    nameSaveFile = f"./files/converted_{name}.pdf"
 
-    presentation = slides.Presentation('./files/' + inputfile)
+    presentation = slides.Presentation(inputfile)
 
     presentation.save(nameSaveFile, slides.export.SaveFormat.PDF)
-    
-file = 'word.docx'
-
-conversionWordODTTToPDF(file)
