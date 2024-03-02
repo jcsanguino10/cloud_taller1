@@ -138,6 +138,33 @@ async def create_task(current_user: Annotated[schema.UserData, Depends(get_curre
     # name_file = name
     # if name == "none":
     name_file = file.filename
+    try:
+        if file and file.filename:
+            if file.filename.endswith(".docx") or file.filename.endswith(".odt"):
+                with open(file.filename, "wb") as buffer:
+                    buffer.write(file.read())
+
+                converted_content = conversionWordODTTToPDF(file.filename)
+
+            elif file.filename.endswith(".xlsx"):
+                with open(file.filename, "wb") as buffer:
+                    buffer.write(file.read())
+
+                converted_content = conversionExcelToPDF(file.filename)
+
+            elif file.filename.endswith(".pptx"):
+                with open(file.filename, "wb") as buffer:
+                    buffer.write(file.read())
+
+                converted_content = conversionPPTToPDF(file.filename)
+
+            else:
+                raise HTTPException(status_code=400, detail="Unsupported file format")
+        else:
+            raise HTTPException(status_code=400, detail="No file provided")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
     db_task = crud.create_task(db, schema.CreateTask( user = current_user.id, name = name_file))
     transform_document(db_task.id, file)
     return db_task
