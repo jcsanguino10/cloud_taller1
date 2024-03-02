@@ -1,9 +1,18 @@
 version: "3"
 services:
+  frontend:
+    build: "./front_cloud"
+    volumes:
+      - /home/app_back/images_users:/home/app_front/public/images_users
+    ports:
+      - "3000:3000"
+
   db:
     image: "postgres"
     volumes:
       - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
     expose:
       - 5432
     environment:
@@ -21,13 +30,8 @@ services:
       - db
     depends_on:
       - redis
+      - db
 
-  frontend:
-    build: "./front_cloud"
-    volumes:
-      - /home/app_back/images_users:/home/app_front/public/images_users
-    ports:
-      - "3000:3000"
 
   redis:
     image: redis
