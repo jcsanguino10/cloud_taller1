@@ -129,6 +129,14 @@ async def create_user(name: str = Form(...), password:str = Form(...)):
             raise HTTPException(status_code=400, detail=str(exp))
     return db_user
 
+@app.get("/task/{task_id}")
+async def get_task_id(task_id: int, current_user: Annotated[schema.UserData, Depends(get_current_user)]):
+    db_task = crud.get_task(db, task_id)
+    validate_user(current_user.id, db_task.user)
+    if not db_task:
+        raise HTTPException(status_code=400, detail="Task not exists")
+    return db_task
+
 logging.basicConfig(level=logging.INFO)
 # Task
 # ,name: str = Form(...),
