@@ -6,7 +6,7 @@ import enum
 class State(enum.Enum):
     START = "start"
     PROGRESS = "progress"
-    FINISH = "finish"
+    FINISH = "finish"   
     
 class User(Base):
     __tablename__ = 'user'

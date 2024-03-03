@@ -2,7 +2,8 @@ from fastapi import FastAPI, HTTPException, Depends, status, UploadFile, File, F
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 from conversion_files import conversionWordODTTToPDF, conversionExcelToPDF, conversionPPTToPDF
-import io
+import io, os
+import logging
 from typing import Annotated
 import crud, entities, schema, conversion_files
 from fastapi.security import OAuth2PasswordBearer,OAuth2PasswordRequestForm
@@ -128,35 +129,60 @@ async def create_user(name: str = Form(...), password:str = Form(...)):
             raise HTTPException(status_code=400, detail=str(exp))
     return db_user
 
+logging.basicConfig(level=logging.INFO)
 # Task
 # ,name: str = Form(...),
 @app.post("/task")
-async def create_task(current_user: Annotated[schema.UserData, Depends(get_current_user)],file: UploadFile = File(None)):
-    db_user = current_user
-    if not db_user:
-        raise HTTPException(status_code=400, detail="User not exists")
-    # name_file = name
-    # if name == "none":
-    name_file = file.filename
+async def create_task(current_user: schema.UserData = Depends(get_current_user), file: UploadFile = File(...)):
     try:
+        db_task = crud.create_task(db, schema.CreateTask(user=current_user.id, name=file.filename, state=entities.State.START))
+        #Creo una tarea nueva y veo su estado y url
+        logging.info(f"Tarea creada - ID: {db_task.id}, Usuario: {current_user.id}, Nombre: {file.filename}, Estado: {db_task.state}, URL: {db_task.url}")
+        
         if file and file.filename:
-            if file.filename.endswith(".docx") or file.filename.endswith(".odt"):
-                with open(file.filename, "wb") as buffer:
-                    buffer.write(file.read())
+            # Cambiar el estado de la tarea a PROGRESS
+            db_task.state = entities.State.PROGRESS
+            db.commit()
+            old_path = os.path.join('files', file.filename)
 
-                converted_content = conversionWordODTTToPDF(file.filename)
+            if file.filename.endswith(".docx") or file.filename.endswith(".odt"):
+                with open(old_path, "wb") as buffer:
+                    buffer.write(await file.read())
+
+                converted_content = conversionWordODTTToPDF(f"./files/{file.filename}")
+                # Cambiar el estado de la tarea a FINISH
+                converted_file_path = f"./files/converted_{file.filename.split('.')[0]}.pdf"
+                db_task.url = converted_file_path
+                db_task.state = entities.State.FINISH
+                db.commit()
+                #Tarea después de que se convierta el archivo
+                logging.info(f"Tarea terminada en task: {db_task.id}, Usuario: {current_user.id}, Nombre: {file.filename}, Estado: {db_task.state}, URL: {db_task.url}")
+                return Response(content=converted_content, media_type="application/pdf")
+                
 
             elif file.filename.endswith(".xlsx"):
-                with open(file.filename, "wb") as buffer:
-                    buffer.write(file.read())
+                with open(old_path, "wb") as buffer:
+                    buffer.write(await file.read())
 
-                converted_content = conversionExcelToPDF(file.filename)
+                converted_content = conversionExcelToPDF(f"./files/{file.filename}")
+                # Cambiar el estado de la tarea a FINISH
+                converted_file_path = f"./files/converted_{file.filename.split('.')[0]}.pdf"
+                db_task.url = converted_file_path
+                db_task.state = entities.State.FINISH
+                db.commit()
+                return Response(content=converted_content, media_type="application/pdf")
 
             elif file.filename.endswith(".pptx"):
-                with open(file.filename, "wb") as buffer:
-                    buffer.write(file.read())
+                with open(old_path, "wb") as buffer:
+                    buffer.write(await file.read())
 
-                converted_content = conversionPPTToPDF(file.filename)
+                converted_content = conversionPPTToPDF(f"./files/{file.filename}")
+                # Cambiar el estado de la tarea a FINISH
+                converted_file_path = f"./files/converted_{file.filename.split('.')[0]}.pdf"
+                db_task.url = converted_file_path
+                db_task.state = entities.State.FINISH
+                db.commit()
+                return Response(content=converted_content, media_type="application/pdf")
 
             else:
                 raise HTTPException(status_code=400, detail="Unsupported file format")
@@ -164,30 +190,33 @@ async def create_task(current_user: Annotated[schema.UserData, Depends(get_curre
             raise HTTPException(status_code=400, detail="No file provided")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-    db_task = crud.create_task(db, schema.CreateTask( user = current_user.id, name = name_file))
-    transform_document(db_task.id, file)
-    return db_task
+    
 
 @app.put("/task/{task_id}")
-async def update_task(task_id: str, task:schema.Task, current_user: Annotated[schema.UserData, Depends(get_current_user)]):
+async def update_task(
+    task_id: str, task: schema.Task, current_user: schema.UserData = Depends()
+):
     validate_user(task.user, current_user.id)
     db_task = crud.get_task(db, task_id)
     if not db_task:
         raise HTTPException(status_code=400, detail="Task not exists")
     else:
-        db_task = crud.update_task(db,task)
+        db_task = crud.update_task(db, task)
     return "Task updated!"
 
+
 @app.get("/tasks/user/{user_id}")
-def get_task_user(user_id:str ,user: Annotated[str, Depends(get_current_user)]):
+def get_task_user(user_id: str, user: str = Depends(get_current_user)):
     validate_user(user_id, str(user.id))
-    db_tasks = crud.get_tasks_by_user(db,user.id)
+    db_tasks = crud.get_tasks_by_user(db, user.id)
     return db_tasks
 
+
 @app.delete("/task/{task_id}")
-async def del_task(task_id: int, current_user: Annotated[schema.UserData, Depends(get_current_user)]):
-    task = crud.get_task(db,task_id)
+async def del_task(
+    task_id: int, current_user: schema.UserData = Depends(get_current_user)
+):
+    task = crud.get_task(db, task_id)
     validate_user(task.user, current_user.id)
     answer = crud.delete_task(db, task_id)
     if not answer:
@@ -195,31 +224,31 @@ async def del_task(task_id: int, current_user: Annotated[schema.UserData, Depend
     return "Category deleted!"
 
 #Conversion
-@app.post("/convert-file")
-async def convert_file(file: UploadFile = File(...)):
-    try:
+'''
+el endpoint con celery que no funcionaba por la conexión a Redis
+try:
         if file and file.filename:
-            if file.filename.endswith(".docx") or file.filename.endswith(".odt"):
-                with open(file.filename, "wb") as buffer:
+            if file.filename.endswith((".docx", ".odt", ".xlsx", ".pptx")):
+                file_path = os.path.join("./files", file.filename)
+                
+                with open(file_path, "wb") as buffer:
                     buffer.write(await file.read())
 
-                converted_content = conversionWordODTTToPDF(file.filename)
-                return Response(content=converted_content, media_type="application/pdf")
+                db_task = crud.create_task(db, schema.CreateTask(user=current_user.id, name=file.filename, state=entities.State.START))
 
-            elif file.filename.endswith(".xlsx"):
-                with open(file.filename, "wb") as buffer:
-                    buffer.write(await file.read())
+                logging.info(f"Tarea creada - ID: {db_task.id}, Usuario: {current_user.id}, Nombre: {file.filename}, Estado: {db_task.state}, URL: {db_task.url}")
 
-                converted_content = conversionExcelToPDF(file.filename)
-                return Response(content=converted_content, media_type="application/pdf")
+                # Cambiar el estado de la tarea a PROGRESS
+                db_task.state = entities.State.PROGRESS
+                db.commit()
 
-            elif file.filename.endswith(".pptx"):
-                with open(file.filename, "wb") as buffer:
-                    buffer.write(await file.read())
+                # Pasa la tarea al trabajador de Celery para su procesamiento
+                transform_document.delay(db_task.id, file_path)
 
-                converted_content = conversionPPTToPDF(file.filename)
-                return Response(content=converted_content, media_type="application/pdf")
+                # Registra el estado de la tarea después de enviarla a Celery
+                logging.info(f"Tarea enviada a Celery para conversión - ID: {db_task.id}, Usuario: {current_user.id}, Nombre: {file.filename}, Estado: {db_task.state}, URL: {db_task.url}")
 
+                return db_task
             else:
                 raise HTTPException(status_code=400, detail="Unsupported file format")
         else:
@@ -227,12 +256,12 @@ async def convert_file(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+'''
 #Descarga
 @app.get("/download-converted-file/{file_name}")
 async def download_converted_file(file_name: str):
     try:
-        file_path = f"./files/converted_{file_name}.pdf"
+        file_path = os.path.join("files", f"converted_{file_name.split('.')[0]}.pdf")
         return FileResponse(file_path, media_type="application/pdf", filename=file_name)
     except Exception as e:
         return {"error": str(e)}
-
