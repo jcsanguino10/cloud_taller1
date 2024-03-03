@@ -13,3 +13,5 @@ aspose-words
 openpyxl
 reportlab
 aspose.slides
+python-docx 
+pypandoc

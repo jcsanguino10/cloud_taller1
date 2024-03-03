@@ -1,8 +1,8 @@
 import os.path
 import logging
-
 # Word - ODT
-import aspose.words as aw
+from docx import Document
+import pypandoc
 
 # Excel
 from openpyxl import load_workbook
@@ -23,22 +23,21 @@ def conversionWordODTTToPDF(inputfile: str):
         inputfile (str): Ruta del archivo de entrada
     """
     try:
-        
-        logging.info(f"Iniciando conversión de {inputfile} a PDF")
-        
-        name = os.path.splitext(os.path.basename(inputfile))[0]
-        nameSaveFile = f"./files/converted/{name}.pdf"
-        logging.info(f"Archivo de entrada: {inputfile}")
-        logging.info(f"Archivo de salida: {nameSaveFile}")
-        
-        doc = aw.Document(inputfile)
-        doc.save(nameSaveFile)
-        
-        logging.info("Conversión completada con éxito")
+        file_path = os.path.join(os.path.dirname(os.path.abspath(inputfile)),inputfile.split("/")[-1] )
+        nameSaveFile = file_path.replace("uploaded", "converted").replace("docx", "pdf") if file_path.endswith("docx") else file_path.replace("uploaded", "converted").replace("odt", "pdf")
+
+        if file_path.endswith('.docx'):
+            doc = Document(file_path)
+            doc.save(nameSaveFile)
+        elif file_path.endswith('.odt'):
+            pypandoc.convert_file(file_path, 'pdf', outputfile=nameSaveFile)
+        else:
+            return {"error": "Formato de archivo no compatible"}
+
         return nameSaveFile
     except Exception as e:
-        logging.error(f"Error durante la conversión: {e}")
-
+        print(e)
+        raise Exception ("Error converting file")
 def conversionExcelToPDF(inputfile: str):
     """
     Parameters: 
@@ -49,11 +48,11 @@ def conversionExcelToPDF(inputfile: str):
     -----
         inputfile (str): Ruta del archivo de entrada
     """
-    name = os.path.splitext(os.path.basename(inputfile))[0]
-    nameSaveFile = f"./files/converted/{name}.pdf"
-
-    wb = load_workbook(filename=inputfile)
-    ws = wb.active
+    file_path = os.path.join(os.path.dirname(os.path.abspath(inputfile)),inputfile.split("/")[-1] )
+    nameSaveFile = file_path.replace("uploaded", "converted").replace("xlsx", "pdf")
+    
+    wb = load_workbook(filename=file_path)
+    ws = wb.active  
 
     data = [[cell.value for cell in row] for row in ws.iter_rows()]
 
@@ -73,9 +72,8 @@ def conversionPPTToPDF(inputfile: str):
     -----
         inputfile (str): Ruta del archivo de entrada
     """
-    name = os.path.splitext(os.path.basename(inputfile))[0]
-    nameSaveFile = f"./files/converted/{name}.pdf"
-
+    file_path = os.path.join(os.path.dirname(os.path.abspath(inputfile)),inputfile.split("/")[-1] )
+    nameSaveFile = file_path.replace("uploaded", "converted").replace("pptx", "pdf")
     presentation = slides.Presentation(inputfile)
 
     presentation.save(nameSaveFile, slides.export.SaveFormat.PDF)

@@ -26,6 +26,7 @@ services:
     build: "./back_cloud"
     volumes:
       - .:/app
+      - app_back:/home/app_back
     ports:
       - "8000:8000"
     depends_on:
@@ -49,6 +50,7 @@ services:
       - SYSTEM_GLOBALIZATION_INVARIANT=true
     volumes:
       - .:/app
+      - app_back:/home/app_back
     depends_on:
       - redis
       - backend
@@ -68,6 +70,7 @@ services:
       - db-network
 volumes:
   postgres_data:
+  app_back:
 
 networks:
   db-network:
