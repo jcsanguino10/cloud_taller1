@@ -16,7 +16,19 @@ from fpdf import FPDF
 
 logging.basicConfig(level=logging.DEBUG)#Dejo esto por si hay que revisar algo
 
-def conversionWordODTTToPDF(inputfile: str):
+def conversionWordODTTToPDF(inputfile: str) -> str:
+    """
+    This function converts a word document (DOCX or ODT) to a PDF file.
+
+    Args:
+        inputfile (str): The path to the input file.
+
+    Returns:
+        str: The path to the output PDF file.
+
+    Raises:
+        Exception: If the input file format is not supported.
+    """
     try:
         file_path = os.path.join(os.path.dirname(os.path.abspath(inputfile)),inputfile.split("/")[-1] )
         nameSaveFile = file_path.replace("uploaded", "converted").replace("docx", "pdf") if file_path.endswith("docx") else file_path.replace("uploaded", "converted").replace("odt", "pdf")
@@ -33,7 +45,19 @@ def conversionWordODTTToPDF(inputfile: str):
     except Exception as e:
         print(e)
         raise Exception ("Error converting file")
-def conversionExcelToPDF(inputfile: str):
+def conversionExcelToPDF(inputfile: str) -> str:
+    """
+    This function converts an excel file to a PDF file.
+
+    Args:
+        inputfile (str): The path to the input file.
+
+    Returns:
+        str: The path to the output PDF file.
+
+    Raises:
+        Exception: If the input file format is not supported.
+    """
     try:
         file_path = os.path.join(os.path.dirname(os.path.abspath(inputfile)),inputfile.split("/")[-1] )
         nameSaveFile = file_path.replace("uploaded", "converted").replace("xlsx", "pdf")
@@ -53,6 +77,18 @@ def conversionExcelToPDF(inputfile: str):
         raise Exception ("Error converting file")
 
 def conversionPPTToPDF(inputfile: str):
+    """
+    This function converts a PowerPoint presentation (PPTX) to a PDF file.
+
+    Args:
+        inputfile (str): The path to the input file.
+
+    Returns:
+        str: The path to the output PDF file.
+
+    Raises:
+        Exception: If the input file format is not supported.
+    """
     try:
         
         file_path = os.path.join(os.path.dirname(os.path.abspath(inputfile)),inputfile.split("/")[-1] )

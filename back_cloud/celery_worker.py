@@ -21,6 +21,16 @@ celery_app.conf.beat_schedule = {
 
 celery_app.autodiscover_tasks()
 
+"""
+This function is used to convert all uploaded files to PDF format.
+
+Args:
+    self (obj): The Celery task instance.
+
+Returns:
+    (dict): A dictionary containing the status of the task.
+
+"""
 @celery_app.task(name="transform_all_documents", bind=True)
 def transform_all_documents(self):
     db = SessionLocal()
