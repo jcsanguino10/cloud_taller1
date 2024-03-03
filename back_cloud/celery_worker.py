@@ -13,9 +13,9 @@ celery_app = Celery('tasks', broker='redis://redis:6379/0', backend='redis://red
 logging.basicConfig(level=logging.INFO)
 
 celery_app.conf.beat_schedule = {
-    'convert-uploaded-files-every-30-minutes': {
+    'convert-uploaded-files-every-10-minutes': {
         'task': 'transform_all_documents',
-        'schedule': timedelta(seconds=10)
+        'schedule': timedelta(minutes=5)
     },
 }
 
