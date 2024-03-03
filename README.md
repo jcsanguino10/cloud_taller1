@@ -65,13 +65,13 @@ $ docker compose up --build
 
 Made by 
 
-<a href="https://github.com/jcsanguino10" target="_blank">Juan</a>
+<a href="https://github.com/jcsanguino10" target="_blank">Juan Camilo Sanguino Perez</a>
 
-<a href="https://github.com/jcsanguino10" target="_blank">Julian Camilo Garcia Escobar</a>
+<a href="https://github.com/JuliXnCXm" target="_blank">Julian Camilo Garcia Escobar</a>
 
-<a href="https://github.com/jcsanguino10" target="_blank">Alejandra</a>
+<a href="https://github.com/maleja2309" target="_blank">María Alejandra Vargas Torres</a>
 
-<a href="https://github.com/jcsanguino10" target="_blank">Julian</a>
+<a href="https://github.com/julian27m" target="_blank">Julian Camilo Mora Valbuena</a>
 
 &#xa0;
 

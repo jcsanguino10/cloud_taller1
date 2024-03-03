@@ -312,7 +312,7 @@ async def download_converted_file(file_name: str):
         HTTPException: If an error occurs while attempting to retrieve or download the file.
     """
     try:
-        file_path = os.path.join("home/app_back/files", f"converted/{file_name.split('.')[0]}.pdf")
+        file_path = os.path.join(os.getcwd(),f"files/converted/{file_name.split('.')[0]}.pdf" )
         return FileResponse(file_path, media_type="application/pdf", filename=file_name)
     except Exception as e:
         return {"error": str(e)}
