@@ -9,7 +9,7 @@ import crud, entities, schema, conversion_files
 from fastapi.security import OAuth2PasswordBearer,OAuth2PasswordRequestForm
 from database import SessionLocal, engine
 from jose import JWTError, jwt
-from celery_worker import transform_document
+# from celery_worker import transform_document
 
 
 SECRET_KEY = "e495fd6722159e05be44f58d6ce255046dcd45725f9a858bb2f875905651dc78"
@@ -135,59 +135,61 @@ logging.basicConfig(level=logging.INFO)
 @app.post("/task")
 async def create_task(current_user: schema.UserData = Depends(get_current_user), file: UploadFile = File(...)):
     try:
-        db_task = crud.create_task(db, schema.CreateTask(user=current_user.id, name=file.filename, state=entities.State.START))
+        db_task = crud.create_task(db, schema.CreateTask(user=current_user.id, name=file.filename, state=entities.State.START), file=file)
         #Creo una tarea nueva y veo su estado y url
         logging.info(f"Tarea creada - ID: {db_task.id}, Usuario: {current_user.id}, Nombre: {file.filename}, Estado: {db_task.state}, URL: {db_task.url}")
         
-        if file and file.filename:
-            # Cambiar el estado de la tarea a PROGRESS
-            db_task.state = entities.State.PROGRESS
-            db.commit()
-            old_path = os.path.join('files', file.filename)
+        
+        
+        # if file and file.filename:
+        #     # Cambiar el estado de la tarea a PROGRESS
+        #     db_task.state = entities.State.PROGRESS
+        #     db.commit()
+        #     old_path = os.path.join('files', file.filename)
 
-            if file.filename.endswith(".docx") or file.filename.endswith(".odt"):
-                with open(old_path, "wb") as buffer:
-                    buffer.write(await file.read())
+        #     if file.filename.endswith(".docx") or file.filename.endswith(".odt"):
+        #         with open(old_path, "wb") as buffer:
+        #             buffer.write(await file.read())
 
-                converted_content = conversionWordODTTToPDF(f"./files/{file.filename}")
-                # Cambiar el estado de la tarea a FINISH
-                converted_file_path = f"./files/converted_{file.filename.split('.')[0]}.pdf"
-                db_task.url = converted_file_path
-                db_task.state = entities.State.FINISH
-                db.commit()
-                #Tarea después de que se convierta el archivo
-                logging.info(f"Tarea terminada en task: {db_task.id}, Usuario: {current_user.id}, Nombre: {file.filename}, Estado: {db_task.state}, URL: {db_task.url}")
-                return Response(content=converted_content, media_type="application/pdf")
+        #         converted_content = conversionWordODTTToPDF(f"./files/{file.filename}")
+        #         # Cambiar el estado de la tarea a FINISH
+        #         converted_file_path = f"./files/converted_{file.filename.split('.')[0]}.pdf"
+        #         db_task.url = converted_file_path
+        #         db_task.state = entities.State.FINISH
+        #         db.commit()
+        #         #Tarea después de que se convierta el archivo
+        #         logging.info(f"Tarea terminada en task: {db_task.id}, Usuario: {current_user.id}, Nombre: {file.filename}, Estado: {db_task.state}, URL: {db_task.url}")
+        #         return Response(content=converted_content, media_type="application/pdf")
                 
 
-            elif file.filename.endswith(".xlsx"):
-                with open(old_path, "wb") as buffer:
-                    buffer.write(await file.read())
+        #     elif file.filename.endswith(".xlsx"):
+        #         with open(old_path, "wb") as buffer:
+        #             buffer.write(await file.read())
 
-                converted_content = conversionExcelToPDF(f"./files/{file.filename}")
-                # Cambiar el estado de la tarea a FINISH
-                converted_file_path = f"./files/converted_{file.filename.split('.')[0]}.pdf"
-                db_task.url = converted_file_path
-                db_task.state = entities.State.FINISH
-                db.commit()
-                return Response(content=converted_content, media_type="application/pdf")
+        #         converted_content = conversionExcelToPDF(f"./files/{file.filename}")
+        #         # Cambiar el estado de la tarea a FINISH
+        #         converted_file_path = f"./files/converted_{file.filename.split('.')[0]}.pdf"
+        #         db_task.url = converted_file_path
+        #         db_task.state = entities.State.FINISH
+        #         db.commit()
+        #         return Response(content=converted_content, media_type="application/pdf")
 
-            elif file.filename.endswith(".pptx"):
-                with open(old_path, "wb") as buffer:
-                    buffer.write(await file.read())
+        #     elif file.filename.endswith(".pptx"):
+        #         with open(old_path, "wb") as buffer:
+        #             buffer.write(await file.read())
 
-                converted_content = conversionPPTToPDF(f"./files/{file.filename}")
-                # Cambiar el estado de la tarea a FINISH
-                converted_file_path = f"./files/converted_{file.filename.split('.')[0]}.pdf"
-                db_task.url = converted_file_path
-                db_task.state = entities.State.FINISH
-                db.commit()
-                return Response(content=converted_content, media_type="application/pdf")
+        #         converted_content = conversionPPTToPDF(f"./files/{file.filename}")
+        #         # Cambiar el estado de la tarea a FINISH
+        #         converted_file_path = f"./files/converted_{file.filename.split('.')[0]}.pdf"
+        #         db_task.url = converted_file_path
+        #         db_task.state = entities.State.FINISH
+        #         db.commit()
+        #         return Response(content=converted_content, media_type="application/pdf")
 
-            else:
-                raise HTTPException(status_code=400, detail="Unsupported file format")
-        else:
-            raise HTTPException(status_code=400, detail="No file provided")
+        #     else:
+        #         raise HTTPException(status_code=400, detail="Unsupported file format")
+        # else:
+        #     raise HTTPException(status_code=400, detail="No file provided")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     

@@ -26,7 +26,7 @@ def conversionWordODTTToPDF(inputfile: str):
         logging.info(f"Iniciando conversión de {inputfile} a PDF")
         
         name = os.path.splitext(os.path.basename(inputfile))[0]
-        nameSaveFile = f"./files/converted_{name}.pdf"
+        nameSaveFile = f"./files/converted/{name}.pdf"
         
         logging.info(f"Archivo de entrada: {inputfile}")
         logging.info(f"Archivo de salida: {nameSaveFile}")
@@ -35,6 +35,7 @@ def conversionWordODTTToPDF(inputfile: str):
         doc.save(nameSaveFile)
         
         logging.info("Conversión completada con éxito")
+        return nameSaveFile
     except Exception as e:
         logging.error(f"Error durante la conversión: {e}")
 
@@ -49,7 +50,7 @@ def conversionExcelToPDF(inputfile: str):
         inputfile (str): Ruta del archivo de entrada
     """
     name = os.path.splitext(os.path.basename(inputfile))[0]
-    nameSaveFile = f"./files/converted_{name}.pdf"
+    nameSaveFile = f"./files/converted/{name}.pdf"
 
     wb = load_workbook(filename=inputfile)
     ws = wb.active
@@ -60,6 +61,7 @@ def conversionExcelToPDF(inputfile: str):
 
     pdf = SimpleDocTemplate(nameSaveFile, pagesize=letter)
     pdf.build([pdf_table])
+    return nameSaveFile
 
 def conversionPPTToPDF(inputfile: str):
     """
@@ -72,8 +74,9 @@ def conversionPPTToPDF(inputfile: str):
         inputfile (str): Ruta del archivo de entrada
     """
     name = os.path.splitext(os.path.basename(inputfile))[0]
-    nameSaveFile = f"./files/converted_{name}.pdf"
+    nameSaveFile = f"./files/converted/{name}.pdf"
 
     presentation = slides.Presentation(inputfile)
 
     presentation.save(nameSaveFile, slides.export.SaveFormat.PDF)
+    return nameSaveFile

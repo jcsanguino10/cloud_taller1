@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 import entities, schema
-
+import os
+import shutil
 # User
 
 def get_user(db: Session, user_id: int):
@@ -30,6 +31,10 @@ def create_user(db: Session, name:str, password:str):
 def get_task(db: Session, task_id: int):
     return db.query(entities.Task).filter(entities.Task.id == task_id).first()
 
+
+def get_task_uploaded_state(db: Session):
+    return db.query(entities.Task).filter(entities.Task.state == entities.State.START).all()
+
 def get_tasks_by_user(db: Session, user_id: int):
     return db.query(entities.Task).filter(entities.Task.user == user_id).all()
     
@@ -53,8 +58,22 @@ def delete_task(db: Session, task_id: schema.Task):
     except:
         return False
 
-def create_task(db: Session, task: schema.CreateTask):
-    db_task = entities.Task(**task.dict())
+def create_task(db: Session, task: schema.CreateTask, file ):
+    
+    if file and file.filename: 
+        extension = file.filename.rsplit('.', 1)[1].lower()
+        directorio_archivos = 'files/uploaded/'
+        if extension in ['docx', 'xlsx', 'ppt', 'odt']:
+            ruta_archivo = os.path.join(directorio_archivos, file.filename)
+            task_dict = task.dict()
+            try:
+                task_dict["url"] = ruta_archivo
+                with open(ruta_archivo, "wb") as buffer:
+                    shutil.copyfileobj(file.file, buffer)
+            except Exception as e:
+                print(e)
+                raise Exception ("Error saving file")
+    db_task = entities.Task(**task_dict)
     db.add(db_task)
     db.commit()
     db.refresh(db_task)

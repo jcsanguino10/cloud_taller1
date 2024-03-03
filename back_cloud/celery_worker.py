@@ -1,47 +1,59 @@
 #Cambios comentados
 import os
 import time
+from datetime import timedelta
 from celery import Celery
-#from conversion_files import conversionWordODTTToPDF, conversionExcelToPDF, conversionPPTToPDF
-#from entities import State
-#import crud
-#from database import SessionLocal
-#import logging
+from conversion_files import conversionWordODTTToPDF, conversionExcelToPDF, conversionPPTToPDF
+from entities import State
+import crud
+from database import SessionLocal
+import logging
 
-celery_app = Celery('tasks', broker='redis://redis/0', backend='redis://redis/0')
-#logging.basicConfig(level=logging.INFO)
+celery_app = Celery('tasks', broker='redis://redis:6379/0', backend='redis://redis:6379/0')
+logging.basicConfig(level=logging.INFO)
 
-@celery_app.task()
-def transform_document(task_id, file):
-#def transform_document(task_id, file_path):
-    '''
-    try:
-        db = SessionLocal()
+celery_app.conf.beat_schedule = {
+    'convert-uploaded-files-every-30-minutes': {
+        'task': 'transform_all_documents',
+        'schedule': timedelta(seconds=10)
+    },
+}
 
-        task = crud.get_task(db, task_id)
-        task.state = State.PROGRESS
-        db.commit()
+celery_app.autodiscover_tasks()
 
-        if file_path.endswith((".docx", ".odt")):
-            conversionWordODTTToPDF(file_path)
-        elif file_path.endswith(".xlsx"):
-            conversionExcelToPDF(file_path)
-        elif file_path.endswith(".pptx"):
-            conversionPPTToPDF(file_path)
-        else:
-            raise ValueError("Unsupported file format")
+@celery_app.task(name="transform_all_documents", bind=True)
+def transform_all_documents(self):
+    db = SessionLocal()
+    uploaded_tasks = crud.get_task_uploaded_state(db=db)
+    for task in uploaded_tasks:
+        try:
+            task = crud.get_task(db, task.id)
+            filename = task.url
+            task.state = State.PROGRESS
+            print(task.state)
+            db.commit()
+            
+            pdf_dir = os.path.dirname(filename.replace('uploaded', 'converted'))
+            if not os.path.exists(pdf_dir):
+                os.makedirs(pdf_dir)
+            if filename.endswith((".docx", ".odt")):
+                fileSaved = conversionWordODTTToPDF(filename)
+            elif filename.endswith(".xlsx"):
+                fileSaved = conversionExcelToPDF(filename)
+            elif filename.endswith(".pptx"):
+                fileSaved = conversionPPTToPDF(filename)
+            else:
+                raise ValueError("Unsupported file format")
 
-        converted_file_path = f"./files/converted_{os.path.basename(file_path)}.pdf"
-        task.url = converted_file_path
-        task.state = State.FINISH
-        db.commit()
+            task.url = fileSaved
+            task.state = State.FINISH
+            db.commit()
 
-        return True
-    except Exception as e:
-        task.state = State.ERROR
-        db.commit()
-        return False
-    finally:
-        db.close()
-'''
-    return True
+            return {"task": "File Converted Successfully"}
+        except Exception as e:
+            print(e)
+            task.state = State.ERROR
+            db.commit()
+            return False
+        finally:
+            db.close()
