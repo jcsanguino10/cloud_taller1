@@ -1,15 +1,13 @@
 from fastapi import FastAPI, HTTPException, Depends, status, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, Response
-from conversion_files import conversionWordODTTToPDF, conversionExcelToPDF, conversionPPTToPDF
+from fastapi.responses import FileResponse
 import io, os
 import logging
 from typing import Annotated
-import crud, entities, schema, conversion_files
+import crud, entities, schema
 from fastapi.security import OAuth2PasswordBearer,OAuth2PasswordRequestForm
 from database import SessionLocal, engine
 from jose import JWTError, jwt
-# from celery_worker import transform_document
 
 
 SECRET_KEY = "e495fd6722159e05be44f58d6ce255046dcd45725f9a858bb2f875905651dc78"
@@ -85,13 +83,6 @@ def validate_user(user_id, user_id2):
             detail="This user can not do this operation",
             headers={"WWW-Authenticate": "Bearer"},
         )
-
-# @app.post("/example")
-# def examp(number : int):
-#     task = transform_document.delay(int(number))
-#     return task.id
-
-# Roots
 
 @app.get("/")
 def read_root():

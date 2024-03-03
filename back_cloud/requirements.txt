@@ -9,9 +9,9 @@ psycopg2
 celery
 redis
 flower
-aspose-words
 openpyxl
 reportlab
-aspose.slides
 python-docx 
 pypandoc
+python-pptx 
+fpdf
