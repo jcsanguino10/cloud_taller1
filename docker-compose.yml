@@ -45,6 +45,8 @@ services:
     container_name: celery_worker
     build: "./back_cloud"
     command: celery -A celery_worker worker --beat
+    environment:
+      - SYSTEM_GLOBALIZATION_INVARIANT=true
     volumes:
       - .:/app
     depends_on:

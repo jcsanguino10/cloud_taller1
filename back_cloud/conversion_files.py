@@ -23,11 +23,11 @@ def conversionWordODTTToPDF(inputfile: str):
         inputfile (str): Ruta del archivo de entrada
     """
     try:
+        
         logging.info(f"Iniciando conversión de {inputfile} a PDF")
         
         name = os.path.splitext(os.path.basename(inputfile))[0]
         nameSaveFile = f"./files/converted/{name}.pdf"
-        
         logging.info(f"Archivo de entrada: {inputfile}")
         logging.info(f"Archivo de salida: {nameSaveFile}")
         

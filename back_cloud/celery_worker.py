@@ -30,7 +30,6 @@ def transform_all_documents(self):
             task = crud.get_task(db, task.id)
             filename = task.url
             task.state = State.PROGRESS
-            print(task.state)
             db.commit()
             
             pdf_dir = os.path.dirname(filename.replace('uploaded', 'converted'))
