@@ -148,6 +148,8 @@ async def login_for_access_token(
     access_token = create_access_token(data={"sub": str(user.id)})
     return schema.Token(access_token=access_token, token_type="bearer")
 
+
+@app.get("/user")
 async def get_info_user(user: Annotated[schema.UserData, Depends(get_current_user)]):
     """
     Get the information of the currently authenticated user.
@@ -160,6 +162,9 @@ async def get_info_user(user: Annotated[schema.UserData, Depends(get_current_use
     """
     return user
 
+
+
+@app.post("/user")
 async def create_user(name: str, password: str):
     """
     Create a new user.
@@ -184,6 +189,7 @@ async def create_user(name: str, password: str):
             raise HTTPException(status_code=400, detail=str(exp))
     return db_user
 
+@app.get("/task/{task_id}")
 async def get_task_id(task_id: int, current_user: Annotated[schema.UserData, Depends(get_current_user)]):
     """
     Get a task by its ID.
@@ -291,6 +297,7 @@ async def del_task(
     return "Task deleted!"
 
 #Descarga
+@app.get("/download-converted-file/{file_name}")
 async def download_converted_file(file_name: str):
     """
     This function serves as the endpoint for downloading a converted PDF file.
