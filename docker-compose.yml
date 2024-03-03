@@ -19,6 +19,8 @@ services:
       POSTGRES_USER: example
       POSTGRES_PASSWORD: example
       POSTGRES_DB: backcloud
+    networks:
+      - db-network
 
   backend:
     build: "./back_cloud"
@@ -26,12 +28,11 @@ services:
       - .:/app
     ports:
       - "8000:8000"
-    links:
-      - db
     depends_on:
       - redis
       - db
-
+    networks:
+      - db-network
 
   redis:
     image: redis
@@ -49,3 +50,6 @@ services:
       - backend
 volumes:
   postgres_data:
+
+networks:
+  db-network:
