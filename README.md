@@ -61,7 +61,11 @@ $ cd cloud_taller1
 # Run Docker compose
 $ docker compose up --build
 ```
+## 🖥️ URL ##
+http://ec2-52-21-114-253.compute-1.amazonaws.com:3000/login#
 
+## 🎬 Video ##
+https://uniandes-my.sharepoint.com/:v:/g/personal/jc_sanguino10_uniandes_edu_co/EcGEUn59Cx9EmI3AqBDlqtQB-ui64U_1gElyRuwrRpYGZg?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=enIJFQ
 
 Made by 
 
