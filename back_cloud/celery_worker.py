@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.INFO)
 celery_app.conf.beat_schedule = {
     'convert-uploaded-files-every-10-minutes': {
         'task': 'transform_all_documents',
-        'schedule': timedelta(minutes=5)
+        'schedule': timedelta(seconds=30)
     },
 }
 
