@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Cookies from "universal-cookie";
 
 export default function Dashboard({ setToken, token, userInfo, setTaskStateComponent }) {
+  const cookie = new Cookies();
+
   const [tasks, setTask] = useState([]);
   const navigate = useNavigate();
   
   useEffect(() => {
     const requestOptionUser = {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json', 'Authorization': token }
+      headers: { 'Content-Type': 'application/json', 'Authorization': cookie.get('token') || token }
     };
     
-    fetch(process.env.REACT_APP_BACKURL + "tasks/user/" + userInfo.id, requestOptionUser)
+    fetch(process.env.REACT_APP_BACKURL + "tasks/user/" + cookie.get("user_id"), requestOptionUser)
       .then((response) => response.json())
       .then(data => {
         setTask(data);
@@ -89,25 +92,28 @@ function Task_detail_list({ task }) {
     };
 
     return (
-        <tr key={task.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer">
-          <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-            {task.name}
-          </th>
-          <td className="px-6 py-4">{task.state}</td>
-          <td className="px-6 py-4">
-            {task.url ? (
-              <button
-                onClick={handleDownload}
-                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
-              >
-                Download
-              </button>
-            ) : (
-              <span></span>
-            )}
-          </td>
-        </tr>
-      );
+      <tr
+        key={task.id}
+        className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer"
+      >
+        <th
+          scope="row"
+          className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+        >
+          {task.name}
+        </th>
+        <td className="px-6 py-4">{task.state}</td>
+        <td className="px-6 py-4">
+          <button
+            onClick={handleDownload}
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+            disabled={task.state !== "finish"}
+          >
+            {task.state === "progress" ? "Loading" : "Download"}
+          </button>
+        </td>
+      </tr>
+    );
     }
     
 

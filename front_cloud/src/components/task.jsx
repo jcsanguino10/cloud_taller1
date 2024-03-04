@@ -1,15 +1,20 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Cookies from "universal-cookie";
 
 export default function Task({ isToCreate, token, taskInfo, setTaskInfo }) {
   const navigate = useNavigate();
   const [file, setFile] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
+  const cookie = new Cookies();
 
   function delete_task() {
     const requestOptionUser = {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json', 'Authorization': token },
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: cookie.get("token") || token,
+      },
     };
     fetch(process.env.REACT_APP_BACKURL + "task/" + taskInfo.id, requestOptionUser)
       .then((response) => response.json())
@@ -47,7 +52,7 @@ export default function Task({ isToCreate, token, taskInfo, setTaskInfo }) {
     const requestOptions = {
       method: "POST",
       body: formData,
-      headers: { Authorization: token },
+      headers: { Authorization: cookie.get("token") || token },
     };
   
     const url = process.env.REACT_APP_BACKURL + "task";
