@@ -1,0 +1,334 @@
+{
+	"info": {
+		"_postman_id": "62aabe62-651e-4d51-8aad-a18fca7b4dc2",
+		"name": "Laboratorio 1 - G4",
+		"description": "Documentación de los endpoints para el Laboratorio 1",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23045995"
+	},
+	"item": [
+		{
+			"name": "Usuario",
+			"item": [
+				{
+					"name": "Crear cuenta de Usuario",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": []
+						},
+						"url": {
+							"raw": "{{baseURL}}/user?name=usuario4&password=usuario4",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"user"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "usuario4"
+								},
+								{
+									"key": "password",
+									"value": "usuario4"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Iniciar Sesión",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// extraer el cuerpo de la respuesta como JSON y guardarlo en la variable data",
+									"var data = pm.response.json();",
+									"",
+									"// comprobar si la variable 'token' existe en el cuerpo de la respuesta",
+									"pm.test(\"La respuesta contiene el token\", function () {",
+									"    pm.expect(data.access_token).to.exist;",
+									"});",
+									"",
+									"// guardar el valor del token en una variable de colección de Postman",
+									"pm.collectionVariables.set(\"token\", data.access_token);",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "token",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "usuario3",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "usuario3",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseURL}}/userlogin",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"userlogin"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Usuario",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": []
+						},
+						"url": {
+							"raw": "{{baseURL}}/user",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "**Reques:**\n\n- **Crear Usuario**\n    - Tipo: POST\n    - Dirección: \"/user\"\n    - Entrada:\n        - Nombre usuario\n        - Contrseña\n    - Salida:\n        - Usuario creado\n- **Iniciar Sesión**\n    - Tipo: POST\n    - Dirección: \"/login\"\n    - Entrada:\n        - Nombre usuario\n        - Contraseña\n    - Salida:\n        - Acceso o no a la aplicación\n- **Obtener usuario**\n    - Tipo: GET\n    - Dirección: \"/user\"\n    - Entrada:\n        - Nombre usuario\n    - Salida\n        - Datos del usuario"
+		},
+		{
+			"name": "Tareas",
+			"item": [
+				{
+					"name": "Crear Tarea",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/home/alejandra/Documentos/GitHub/cloud_taller1/back_cloud/files/word.docx"
+								},
+								{
+									"key": "user",
+									"value": "usuario4",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseURL}}/task",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"task"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener tarea",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener tareas por usuario",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/tasks/user/1",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"tasks",
+								"user",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Eliminar una tarea",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/task/1",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"task",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener documento convertido",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "name",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseURL}}/download-converted-file/word.docx",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"download-converted-file",
+								"word.docx"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "**Request:**\n\n- **Crear Tarea**\n    - Tipo: POST\n    - Dirección: \"/task\"\n    - Entrada:\n        - url -> Hace referencia a en donde se guardó el archivo\n    - Salida\n        - Mensaje de confirmación de que la tarea fue creada\n- **Obtener tareas por usuario**\n    - Tipo: GET\n    - Dirección: \"/task/user/{user_id}\"\n    - Salida:\n        - Diccionario con las tareas del usuario\n- **Eliminar una tarea**\n    - Tipo: DELETE\n    - Dirección: \"/task/{task_id}\"\n    - Entrada:\n        - Id de la tarea que se quiere eliminar\n    - Salida:\n        - Tarea eliminada\n- **Obtener tarea**\n    - Tipo: GET\n    - Dirección: \"/task/{task_id}\"\n    - Salida:\n        - Información de la tarea\n- **Obtener documento**\n    \n    - Tipo: GET\n    - Dirección: \"/download-converted-file/{file_name}\"\n        \n        - Nota: Debe estar el nombre y la extensión.\n            \n    - Salida:\n        \n        - Documento convertido"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseURL",
+			"value": "http://localhost:8000"
+		},
+		{
+			"key": "token",
+			"value": ""
+		}
+	]
+}
