@@ -1,7 +1,7 @@
 FROM python:3.11
 
-RUN apt-get update && apt-get install -y libpq-dev && rm -rf /var/lib/apt/lists/*
-RUN apt-get install -y pkg-config libicu-dev
+RUN apt-get update && apt-get install -y libpq-dev pandoc texlive-fonts-recommended texlive-fonts-extra && rm -rf /var/lib/apt/lists/*
+RUN apt-get install -y pkg-config libicu-dev pandoc texlive-fonts-recommended texlive-fonts-extra
 
 RUN mkdir -p /home/app_back
 
