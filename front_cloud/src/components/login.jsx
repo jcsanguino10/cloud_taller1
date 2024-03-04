@@ -33,6 +33,7 @@ export default function Login({setUserInfo,setToken}) {
         .then(
           (data) => {
             console.log(data)
+            cookie.set("user_id", data.id);
             setUserInfo(data);
               const requestOptionsLogin = {
                 method: 'POST',
@@ -50,6 +51,7 @@ export default function Login({setUserInfo,setToken}) {
               .then((response) => response.json())  
               .then(
                 (data) => {
+                  console.log(data)
                   setToken("" + data.token_type + " " + data.access_token)
                   cookie.set(
                     "token",
@@ -57,7 +59,6 @@ export default function Login({setUserInfo,setToken}) {
                   );
                   setAuth(true)
                   cookie.set("auth", true);
-                  cookie.set("user_id", data.id);
                   navigate("/dashboard")
                 }).catch(error=>console.log(error));
           }).catch(error=>console.log(error));
