@@ -99,11 +99,21 @@ def conversionPPTToPDF(inputfile: str):
         pdf.add_page()
         for slide in prs.slides:
             for shape in slide.shapes:
-                if hasattr(shape, "image"):
-                    pdf.image(shape.image.filename, x=None, y=None, w=200)
+                if shape.has_text_frame:
+                    text = ""
+                    for paragraph in shape.text_frame.paragraphs:
+                        text += paragraph.text + "\n"
+                    pdf.set_font("Arial", size=12)
+                    pdf.multi_cell(0, 10, txt=text)
+
+            if shape.shape_type == 13:  
+                image_path = shape.image.anchor.file
+                pdf.image(image_path, x=None, y=None, w=200)
         pdf.output(nameSaveFile)
 
         return nameSaveFile
     except Exception as e:
         print(e)
         raise Exception ("Error converting file")
+    
+conversionPPTToPDF('./files/ppt.pptx')
