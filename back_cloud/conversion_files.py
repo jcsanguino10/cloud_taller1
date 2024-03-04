@@ -7,7 +7,7 @@ import pypandoc
 # Excel
 from openpyxl import load_workbook
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Table
+from reportlab.platypus import SimpleDocTemplate, Table, Paragraph
 
 # PPT
 from pptx import Presentation
@@ -35,7 +35,15 @@ def conversionWordODTTToPDF(inputfile: str) -> str:
 
         if file_path.endswith('.docx'):
             doc = Document(file_path)
-            doc.save(nameSaveFile)
+            pdf = SimpleDocTemplate(nameSaveFile)
+            paragraphs = []
+
+            for paragraph in doc.paragraphs:
+                text = paragraph.text
+                p = Paragraph(text, style=None)
+                paragraphs.append(p)
+            pdf.build(paragraphs)
+
         elif file_path.endswith('.odt'):
             pypandoc.convert_file(file_path, 'pdf', outputfile=nameSaveFile)
         else:
@@ -45,6 +53,7 @@ def conversionWordODTTToPDF(inputfile: str) -> str:
     except Exception as e:
         print(e)
         raise Exception ("Error converting file")
+    
 def conversionExcelToPDF(inputfile: str) -> str:
     """
     This function converts an excel file to a PDF file.
@@ -72,6 +81,7 @@ def conversionExcelToPDF(inputfile: str) -> str:
         pdf = SimpleDocTemplate(nameSaveFile, pagesize=letter)
         pdf.build([pdf_table])
         return nameSaveFile
+    
     except Exception as e:
         print(e)
         raise Exception ("Error converting file")
@@ -116,4 +126,4 @@ def conversionPPTToPDF(inputfile: str):
         print(e)
         raise Exception ("Error converting file")
     
-conversionPPTToPDF('./files/ppt.pptx')
+conversionWordODTTToPDF('./files/newOdt.odt')
